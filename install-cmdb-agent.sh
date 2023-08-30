@@ -8,7 +8,7 @@ if command -v cmdb-agent > /dev/null 2>&1;then
 echo -e '\033[32m已经安装cmdb-agent\033[0m'
 cmdb-agent service status
 else
-echo -e '\033[31m没有安装ycm-deploy-client,开始安装...\033[0m'
+echo -e '\033[31m没有安装cmdb-agent,开始安装...\033[0m'
 wget https://image.yeastar.com/tools/cmdb-agent -O /usr/local/bin/cmdb-agent
 chmod +x /usr/local/bin/cmdb-agent
 echo -e '\033[32mcmdb-agent安装成功\033[0m'

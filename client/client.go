@@ -5,6 +5,7 @@ import (
 	"cmdb-agent/client/midd"
 	"cmdb-agent/client/pkg"
 	"cmdb-agent/client/remotedialerx"
+	"cmdb-agent/client/utils"
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -52,17 +53,28 @@ func Run(ctx context.Context) error {
 	go func() {
 		logrus.Fatal(e.Start(""))
 	}()
-	time.Sleep(3 * time.Second)
+	utils.SetHostId(cfg.Id)
+	// 启动上报服务
+	go customContext.ReportCircle(ctx)
 	headers := http.Header{
 		"tunnel-token": []string{cfg.Auth},
 		"client-key":   []string{strconv.FormatUint(cfg.Id, 10)},
 	}
 	for {
-		err := customContext.RemoteDialerX.NewRemoteDialerX(ctx, cfg.Server, headers)
-		if err != nil {
-			logrus.Error(err)
-		}
-		customContext.RemoteDialerX.Close()
-		time.Sleep(10 * time.Second)
+		CircleRemoteDialerX(customContext, ctx, cfg.Server, headers)
 	}
+}
+
+func CircleRemoteDialerX(customContext *handler.CustomContext, ctx context.Context, url string, headers http.Header) {
+	defer func() {
+		if r := recover(); r != nil {
+			logrus.Error("Recovered CircleRemoteDialerX:", r)
+		}
+	}()
+	err := customContext.RemoteDialerX.NewRemoteDialerX(ctx, url, headers)
+	if err != nil {
+		logrus.Error(err)
+	}
+	customContext.RemoteDialerX.Close()
+	time.Sleep(10 * time.Second)
 }
