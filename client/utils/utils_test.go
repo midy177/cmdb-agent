@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"github.com/shirou/gopsutil/v3/disk"
-	"strings"
 	"testing"
 )
 
@@ -18,11 +17,4 @@ func TestName(t *testing.T) {
 			}
 		}
 	}
-}
-
-func isPhysicalDisk(device string) bool {
-	if strings.HasPrefix(device, "/dev/") && !strings.Contains(device, "loop") {
-		return true
-	}
-	return false
 }
