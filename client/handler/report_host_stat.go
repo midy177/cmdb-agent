@@ -22,7 +22,7 @@ func (cc *CustomContext) reportFun(ctx context.Context) {
 			logrus.Error("Recovered reportFun:", r)
 		}
 	}()
-	time.Sleep(time.Minute * 3)
+	time.Sleep(time.Second * 3)
 	client, err := cc.RemoteDialerX.HttpClient(ctx)
 	if err != nil {
 		logrus.Errorf("can't get http.client-> %s", err.Error())

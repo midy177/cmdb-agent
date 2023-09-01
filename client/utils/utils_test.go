@@ -2,22 +2,27 @@ package utils
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/v3/net"
-	"log"
+	"github.com/shirou/gopsutil/v3/disk"
+	"strings"
 	"testing"
 )
 
 func TestName(t *testing.T) {
-	connections, err := net.Connections("udp")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	count := 0
-	for _, conn := range connections {
-		if conn.Status == "ESTABLISHED" {
-			count++
+	// Disk
+	partitions, err := disk.Partitions(false)
+	if err == nil {
+		for _, partition := range partitions {
+			usageStat, err := disk.Usage(partition.Mountpoint)
+			if err == nil && isPhysicalDisk(partition.Device) {
+				fmt.Printf("%+v %+v\n", partition, usageStat)
+			}
 		}
 	}
-	fmt.Println(len(connections), count)
+}
+
+func isPhysicalDisk(device string) bool {
+	if strings.HasPrefix(device, "/dev/") && !strings.Contains(device, "loop") {
+		return true
+	}
+	return false
 }

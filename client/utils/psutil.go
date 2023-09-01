@@ -5,6 +5,7 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/mem"
+	"strings"
 	"time"
 )
 
@@ -61,16 +62,19 @@ func GetHostStat() *HostStat {
 	if err == nil {
 		var diskStat []PartitionStat
 		for _, partition := range partitions {
-			usageStat, err := disk.Usage(partition.Mountpoint)
-			if err == nil {
-				diskStat = append(diskStat, PartitionStat{
-					Device:      partition.Device,
-					MountPoint:  partition.Mountpoint,
-					FsType:      partition.Fstype,
-					Total:       usageStat.Total / 1024 / 1024 / 1024, // GB
-					UsedPercent: usageStat.UsedPercent,
-				})
+			if isPhysicalDisk(partition.Device) {
+				usageStat, err := disk.Usage(partition.Mountpoint)
+				if err == nil {
+					diskStat = append(diskStat, PartitionStat{
+						Device:      partition.Device,
+						MountPoint:  partition.Mountpoint,
+						FsType:      partition.Fstype,
+						Total:       usageStat.Total / 1024 / 1024 / 1024, // GB
+						UsedPercent: usageStat.UsedPercent,
+					})
+				}
 			}
+
 		}
 		hostStat.DiskStat = diskStat
 	}
@@ -82,4 +86,11 @@ func GetHostStat() *HostStat {
 	}
 
 	return &hostStat
+}
+
+func isPhysicalDisk(device string) bool {
+	if strings.HasPrefix(device, "/dev/") && !strings.Contains(device, "loop") {
+		return true
+	}
+	return false
 }
