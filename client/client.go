@@ -48,6 +48,7 @@ func Run(ctx context.Context) error {
 	e.POST("/tail_file", customContext.TailLogStream)
 	e.POST("/upload_file", customContext.UploadFile)
 	e.POST("/download_file", customContext.DownloadFile)
+	e.GET("/get_stat", customContext.GetStat)
 	// 启动 HTTP 服务器
 	e.Listener = listener // 将 Echo 的 Listener 设置为 Unix socket 监听器
 	go func() {

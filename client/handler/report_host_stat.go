@@ -6,9 +6,16 @@ import (
 	"cmdb-agent/client/utils"
 	"context"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"time"
 )
+
+func (cc *CustomContext) GetStat(c echo.Context) error {
+	hostStat := utils.GetHostStat()
+	return echox.Response{Code: http.StatusOK, Data: hostStat}.JSON(c)
+}
 
 func (cc *CustomContext) ReportCircle(ctx context.Context) {
 	for {
@@ -22,7 +29,7 @@ func (cc *CustomContext) reportFun(ctx context.Context) {
 			logrus.Error("Recovered reportFun:", r)
 		}
 	}()
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Minute * 4)
 	client, err := cc.RemoteDialerX.HttpClient(ctx)
 	if err != nil {
 		logrus.Errorf("can't get http.client-> %s", err.Error())
@@ -39,6 +46,7 @@ func (cc *CustomContext) reportFun(ctx context.Context) {
 		logrus.Errorf("can't Post hostStat data to server -> %s", err.Error())
 		return
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		result, err := echox.ParseResponse(resp)
 		if err != nil {

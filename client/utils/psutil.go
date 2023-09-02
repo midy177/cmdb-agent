@@ -44,7 +44,7 @@ func GetHostStat() *HostStat {
 	if err == nil {
 		hostStat.CpuStat.Core = len(cInfo)
 	}
-	c, err := cpu.Percent(time.Second, false)
+	c, err := cpu.Percent(time.Minute, false)
 
 	if err == nil && len(c) > 0 {
 		hostStat.CpuStat.UsedPercent = c[0]
