@@ -13,7 +13,8 @@ import (
 func Run(ctx context.Context) error {
 	config.FromYamlFile()
 	setupLogger()
-	return client.Run(ctx)
+	//return client.Run(ctx)
+	return client.NewClient(ctx)
 }
 
 // helper function configures the global logger from

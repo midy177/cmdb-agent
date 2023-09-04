@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"cmdb-agent/client/utils"
 	"encoding/json"
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -100,7 +100,9 @@ func (cc *CustomContext) WebsocketTerminal(c echo.Context) error {
 				conn.WriteMessage(websocket.PongMessage, []byte("00"))
 			}
 		} else {
-			copied, err := io.Copy(tty, reader)
+			buf := utils.BPool.Get()
+			copied, err := utils.CopyBuffer(tty, reader, buf)
+			utils.BPool.Put(buf)
 			if err != nil {
 				l.WithError(err).Errorf("Error after copying %d bytes", copied)
 			}

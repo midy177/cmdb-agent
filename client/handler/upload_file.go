@@ -35,6 +35,7 @@ func (cc *CustomContext) UploadFile(c echo.Context) error {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}
 	defer dst.Close()
+
 	if _, err = io.Copy(dst, src); err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}

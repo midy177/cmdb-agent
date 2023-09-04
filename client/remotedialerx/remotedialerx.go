@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/rancher/remotedialer"
 	"github.com/sirupsen/logrus"
-	"net"
 	"net/http"
 	"sync"
 )
@@ -51,15 +50,16 @@ func (r *RemoteDialerX) GetRemoteDialer() (remotedialer.Dialer, error) {
 	return nil, errors.New("remote dialer is close")
 }
 
-func (r *RemoteDialerX) HttpClient(ctx context.Context) (*http.Client, error) {
+func (r *RemoteDialerX) HttpClient() (*http.Client, error) {
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 	if r.Session != nil {
 		return &http.Client{
 			Transport: &http.Transport{
-				DialContext: func(c context.Context, network, addr string) (net.Conn, error) {
-					return r.Session.Dial(ctx, "unix", "/var/run/cmdb-server.sock")
-				},
+				DialContext: r.Session.Dial,
+				//DialContext: func(c context.Context, network, addr string) (net.Conn, error) {
+				//	return r.Session.Dial(ctx, "unix", "/var/run/cmdb-server.sock")
+				//},
 			},
 		}, nil
 	}

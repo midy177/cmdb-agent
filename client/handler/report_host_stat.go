@@ -30,7 +30,7 @@ func (cc *CustomContext) reportFun(ctx context.Context) {
 		}
 	}()
 	time.Sleep(time.Minute * 4)
-	client, err := cc.RemoteDialerX.HttpClient(ctx)
+	client, err := cc.RemoteDialerX.HttpClient()
 	if err != nil {
 		logrus.Errorf("can't get http.client-> %s", err.Error())
 		return
@@ -41,7 +41,7 @@ func (cc *CustomContext) reportFun(ctx context.Context) {
 		logrus.Errorf("can't Marshal hostStat data -> %s", err.Error())
 
 	}
-	resp, err := client.Post("http://unix/report_host_stat", "application/json; charset=utf-8", bytes.NewBuffer(marshalData))
+	resp, err := client.Post("http://remotehandler/report_host_stat", "application/json; charset=utf-8", bytes.NewBuffer(marshalData))
 	if err != nil {
 		logrus.Errorf("can't Post hostStat data to server -> %s", err.Error())
 		return
