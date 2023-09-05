@@ -21,4 +21,5 @@ func Register(app *kingpin.Application) {
 	registerUninstall(cmd)
 	registerRun(cmd)
 	registerRestart(cmd)
+	registerUpgrade(cmd)
 }

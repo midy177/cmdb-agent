@@ -2,8 +2,7 @@ package handler
 
 import (
 	"cmdb-agent/client/echox"
-	"context"
-	selfupdate "github.com/creativeprojects/go-selfupdate"
+	"cmdb-agent/client/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -43,26 +42,22 @@ func (cc *CustomContext) Upgrading(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		assetURL := req.UpgradeUrl
-		assetName := "cmdb-agent"
-		exe, err := os.Executable()
+		err = utils.UpgradeMyself(req.UpgradeUrl)
 		if err != nil {
-			_, err = streamWriter.Write([]byte("err: could not locate executable path.\n"))
+			_, err = streamWriter.Write([]byte("err: " + err.Error() + "\n"))
 			return err
 		}
-		if err := selfupdate.UpdateTo(context.Background(), assetURL, assetName, exe); err != nil {
-			_, err = streamWriter.Write([]byte("error occurred while updating binary: " + err.Error() + "\n"))
-			return err
-		}
+		time.Sleep(time.Millisecond * 100)
 		_, err = streamWriter.Write([]byte("Successfully updated,wait restart program.\n"))
 		if err != nil {
 			return err
 		}
+		time.Sleep(time.Millisecond * 100)
 		_, err = streamWriter.Write([]byte("Start to restart program....\n"))
 		if err != nil {
 			return err
 		}
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Millisecond * 100)
 		// 在新进程中重启动自己
 		cmd := exec.Command("/usr/local/bin/cmdb-agent", "service", "restart")
 		usr, err := user.Current()
