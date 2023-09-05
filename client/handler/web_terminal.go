@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"cmdb-agent/client/utils"
 	"encoding/json"
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -68,12 +68,12 @@ func (cc *CustomContext) WebsocketTerminal(c echo.Context) error {
 			buf := make([]byte, 2048)
 			read, err := tty.Read(buf)
 			if err != nil {
-				conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				_ = conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 				// 处理退出
-				conn.Close()
+				_ = conn.Close()
 				return
 			}
-			conn.WriteMessage(websocket.BinaryMessage, buf[:read])
+			_ = conn.WriteMessage(websocket.BinaryMessage, buf[:read])
 		}
 	}()
 
@@ -97,12 +97,10 @@ func (cc *CustomContext) WebsocketTerminal(c echo.Context) error {
 					l.WithError(err).Error("Unable to resize terminal")
 				}
 			} else {
-				conn.WriteMessage(websocket.PongMessage, []byte("00"))
+				_ = conn.WriteMessage(websocket.PongMessage, []byte("00"))
 			}
 		} else {
-			buf := utils.BPool.Get()
-			copied, err := utils.CopyBuffer(tty, reader, buf)
-			utils.BPool.Put(buf)
+			copied, err := io.Copy(tty, reader)
 			if err != nil {
 				l.WithError(err).Errorf("Error after copying %d bytes", copied)
 			}
