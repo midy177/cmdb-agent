@@ -14,6 +14,7 @@ type upgradeCommand struct {
 
 func (c *upgradeCommand) run(*kingpin.ParseContext) error {
 	fmt.Printf("upgrading the service %s\n", c.config.Name)
+	fmt.Printf("Please run cmdb-agent service restart")
 	return utils.UpgradeMyself(c.upgradeUrl)
 }
 
