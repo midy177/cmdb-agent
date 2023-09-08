@@ -23,7 +23,7 @@ require (
 	golang.org/x/sync v0.3.0
 )
 
-replace github.com/rancher/remotedialer v0.3.0 => github.com/midy177/remotedialer v0.3.7
+replace github.com/rancher/remotedialer v0.3.0 => github.com/midy177/remotedialer v0.3.8
 
 require (
 	code.gitea.io/sdk/gitea v0.15.1 // indirect
