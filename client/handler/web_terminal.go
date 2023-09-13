@@ -62,10 +62,9 @@ func (cc *CustomContext) WebsocketTerminal(c echo.Context) error {
 		Rows: 30,
 		Cols: 80,
 	})
-
 	go func() {
 		for {
-			buf := make([]byte, 2048)
+			buf := make([]byte, 1024)
 			read, err := tty.Read(buf)
 			if err != nil {
 				_ = conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
