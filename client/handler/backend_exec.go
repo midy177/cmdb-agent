@@ -20,7 +20,7 @@ func (cc *CustomContext) ExecOnBackend(c echo.Context) error {
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}
-	runLogPath, err := req.Run()
+	runLogPath, err := req.Run(false)
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}
@@ -42,7 +42,7 @@ func (cc *CustomContext) ExecOnBackendIsRunning(c echo.Context) error {
 }
 
 func (cc *CustomContext) GetExecOnBackendList(c echo.Context) error {
-	list := executor.GetOnRunningExec()
+	list := executor.GetAllOnRunningExec()
 	return echox.Response{Code: http.StatusOK, Data: list}.JSON(c)
 }
 

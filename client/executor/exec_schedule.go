@@ -11,31 +11,32 @@ import (
 	"os/user"
 )
 
-type ExecReq struct {
-	// ID
-	Id uint64 `json:"id"`
-	// Name
-	Name string `json:"name" validate:"required"`
-	// Content
-	Content string `json:"content" validate:"required"`
-	WithEnd bool   `json:"withEnd"`
-}
-
-const logFilePrefix = "/var/log/exec_schedule/"
+const execLogFilePrefix = "/var/log/cmdb-agent/exec_schedule/"
+const cronLogFilePrefix = "/var/log/cmdb-agent/cron_schedule/"
 
 var runningMap syncmap.Map
 
 func init() {
-	_ = os.MkdirAll(logFilePrefix, 0644)
+	_ = os.MkdirAll(execLogFilePrefix, 0644)
+	_ = os.MkdirAll(cronLogFilePrefix, 0644)
 }
 
-func (e *ExecReq) Run() (string, error) {
-	logFilePath := fmt.Sprintf("%s%s", logFilePrefix, e.Name)
-	writer, err := os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+func (e *ExecReq) Run(isCron bool) (string, error) {
+	var logFilePath string
+	if isCron {
+		logFilePath = fmt.Sprintf("%s%d", cronLogFilePrefix, e.Id)
+	} else {
+		logFilePath = fmt.Sprintf("%s%d", execLogFilePrefix, e.Id)
+	}
+	// 保存脚本内容
+	e.saveContent(logFilePath + "/content.sh")
+	// 保存脚本运行日志
+	writer, err := os.OpenFile(logFilePath+"/stat.log", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return "", err
 	}
-	go func(w *os.File, content string, path string) {
+
+	go func(w *os.File, content string, keyName uint64) {
 		defer w.Close()
 		home := "/root"
 		usr, err := user.Current()
@@ -60,20 +61,33 @@ func (e *ExecReq) Run() (string, error) {
 			logrus.Error(err)
 			return
 		}
-		runningMap.Store(path, exec)
-		defer runningMap.Delete(path)
+		runningMap.Store(keyName, exec)
+		defer runningMap.Delete(keyName)
 		_ = exec.Wait()
 		_, _ = w.Write([]byte("\n-------The script finish running-------\n"))
-	}(writer, e.Content, logFilePath)
+	}(writer, e.Content, e.Id)
 
 	return logFilePath, nil
 }
 
-// GetOnRunningExec 获取在运行的脚本列表
-func GetOnRunningExec() []string {
-	var list []string
+func (e *ExecReq) saveContent(dstDir string) {
+	writer, err := os.OpenFile(dstDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	defer writer.Close()
+	if err != nil {
+		logrus.Errorf("faild save content:err-> %s", err.Error())
+		return
+	}
+	_, err = writer.WriteString(e.Content)
+	if err != nil {
+		logrus.Errorf("faild save content:err-> %s", err.Error())
+	}
+}
+
+// GetAllOnRunningExec 获取在运行的脚本列表
+func GetAllOnRunningExec() []uint64 {
+	var list []uint64
 	runningMap.Range(func(key, value any) bool {
-		name, ok := key.(string)
+		name, ok := key.(uint64)
 		if ok {
 			list = append(list, name)
 		}
@@ -83,14 +97,14 @@ func GetOnRunningExec() []string {
 }
 
 // IsRunningExec 获取在运行的脚本列表
-func IsRunningExec(name string) bool {
-	_, ok := runningMap.Load(name)
+func IsRunningExec(keyName uint64) bool {
+	_, ok := runningMap.Load(keyName)
 	return ok
 }
 
 // StopRunningExec 关闭在运行的脚本，返回成功失败状态
-func StopRunningExec(name string) (bool, error) {
-	v, ok := runningMap.Load(name)
+func StopRunningExec(keyName uint64) (bool, error) {
+	v, ok := runningMap.Load(keyName)
 	if !ok {
 		return false, errors.New("脚本没有在运行")
 	}
