@@ -37,7 +37,7 @@ func (cc *CustomContext) ExecOnBackendIsRunning(c echo.Context) error {
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}
-	ok := executor.IsRunningExec(req.Name)
+	ok := executor.IsRunningExec(req.Id)
 	return echox.Response{Code: http.StatusOK, Data: ok}.JSON(c)
 }
 
@@ -56,7 +56,7 @@ func (cc *CustomContext) StopExecOnBackendList(c echo.Context) error {
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}
-	ok, err := executor.StopRunningExec(req.Name)
+	ok, err := executor.StopRunningExec(req.Id)
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}

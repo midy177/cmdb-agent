@@ -7,7 +7,7 @@ type TailLogReq struct {
 }
 
 type StopOnRunningExec struct {
-	Name string `json:"name" validate:"required"`
+	Id uint64 `json:"id" validate:"required"`
 }
 
 type DownloadFileReq struct {
