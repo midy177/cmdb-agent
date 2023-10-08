@@ -3,10 +3,10 @@ package executor
 type ExecReq struct {
 	// IsCron
 	IsCron bool `json:"is_cron"`
-	// ID
-	Id uint64 `json:"id"` // 唯一标识
-	// Name
-	//Name string `json:"name" validate:"required"`
+	// GroupId
+	GroupId uint64 `json:"group_id,optional"` // 唯一标识
+	// Uuid
+	Uuid string `json:"uuid,optional"`
 	// Content
 	Content string `json:"content" validate:"required"`
 }

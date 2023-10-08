@@ -24,9 +24,9 @@ func init() {
 func (e *ExecReq) Run() (string, error) {
 	var logFilePath string
 	if e.IsCron {
-		logFilePath = fmt.Sprintf("%s%d", cronLogFilePrefix, e.Id)
+		logFilePath = fmt.Sprintf("%s%d", cronLogFilePrefix, e.Uuid)
 	} else {
-		logFilePath = fmt.Sprintf("%s%d", execLogFilePrefix, e.Id)
+		logFilePath = fmt.Sprintf("%s%d", execLogFilePrefix, e.Uuid)
 	}
 	// 保存脚本内容
 	e.saveContent(logFilePath + "/content.sh")
@@ -65,7 +65,7 @@ func (e *ExecReq) Run() (string, error) {
 		defer runningMap.Delete(keyName)
 		_ = exec.Wait()
 		_, _ = w.Write([]byte("\n-------The script finish running-------\n"))
-	}(writer, e.Content, e.Id)
+	}(writer, e.Content, e.GroupId)
 
 	return logFilePath, nil
 }
