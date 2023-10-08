@@ -20,7 +20,7 @@ func (cc *CustomContext) ExecOnBackend(c echo.Context) error {
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}
-	runLogPath, err := req.Run(false)
+	runLogPath, err := req.Run()
 	if err != nil {
 		return echox.Response{Code: http.StatusOK, Message: err.Error()}.JSON(c)
 	}

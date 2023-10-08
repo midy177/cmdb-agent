@@ -55,9 +55,6 @@ func (cc *CustomContext) ExecOnline(c echo.Context) error {
 		case <-ctx.Done():
 			return
 		default:
-			if req.WithEnd {
-				_, _ = streamWriter.Write([]byte("-------The script finish running-------\n"))
-			}
 			cancel()
 		}
 	}()

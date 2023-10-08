@@ -21,9 +21,9 @@ func init() {
 	_ = os.MkdirAll(cronLogFilePrefix, 0644)
 }
 
-func (e *ExecReq) Run(isCron bool) (string, error) {
+func (e *ExecReq) Run() (string, error) {
 	var logFilePath string
-	if isCron {
+	if e.IsCron {
 		logFilePath = fmt.Sprintf("%s%d", cronLogFilePrefix, e.Id)
 	} else {
 		logFilePath = fmt.Sprintf("%s%d", execLogFilePrefix, e.Id)
